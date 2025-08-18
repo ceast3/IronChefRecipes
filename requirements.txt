@@ -1,0 +1,17 @@
+# Iron Chef Recipe Database Requirements
+# Python 3.7+ required
+
+# No external dependencies required for base functionality
+# Uses Python standard library only:
+# - sqlite3 (database)
+# - json (data serialization)
+# - csv (export functionality)
+# - datetime (timestamps)
+# - random (recipe generation)
+# - argparse (CLI)
+
+# Optional future dependencies for enhancements:
+# flask>=2.0.0  # For web interface
+# requests>=2.28.0  # For API integrations
+# plotly>=5.0.0  # For analytics dashboard
+# pytest>=7.0.0  # For testing
