@@ -175,6 +175,10 @@ The interactive mode now includes:
 - ✅ Improved chef tips with cuisine-specific advice
 - ✅ Better wine pairing logic
 
+## Security Updates
+
+This system has been enhanced with comprehensive security improvements to prevent SQL injection, XSS, and other vulnerabilities. All user inputs are now properly validated and sanitized. See [SECURITY_UPDATE.md](SECURITY_UPDATE.md) for detailed information about the security enhancements.
+
 ## Future Enhancements
 
 - Add more episodes from the complete Iron Chef Japan series

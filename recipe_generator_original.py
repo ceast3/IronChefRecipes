@@ -1,11 +1,10 @@
 import json
 import random
 from typing import Dict, List
-from iron_chef_database_secure import IronChefDatabaseSecure, SecurityValidator
+from iron_chef_database import IronChefDatabase
 
 class RecipeGenerator:
     def __init__(self):
-        self.validator = SecurityValidator()
         self.cooking_methods = {
             'Japanese': ['grill', 'steam', 'simmer', 'deep-fry', 'sauté', 'blanch', 'marinate'],
             'Chinese': ['stir-fry', 'deep-fry', 'steam', 'braise', 'roast', 'blanch', 'smoke'],
@@ -21,30 +20,7 @@ class RecipeGenerator:
         }
         
     def generate_recipe(self, dish_name: str, main_ingredients: str, cuisine_style: str = 'Japanese') -> Dict:
-        """Generate a recipe based on dish name and ingredients with input validation"""
-        
-        # Validate inputs
-        try:
-            dish_name = self.validator.validate_string(
-                dish_name, max_length=200, field_name="dish name"
-            )
-            if not dish_name:
-                raise ValueError("Dish name is required")
-            
-            main_ingredients = self.validator.validate_string(
-                main_ingredients, max_length=500, field_name="main ingredients"
-            )
-            if not main_ingredients:
-                raise ValueError("Main ingredients are required")
-            
-            cuisine_style = self.validator.validate_string(
-                cuisine_style, max_length=50, field_name="cuisine style"
-            )
-            if cuisine_style not in self.cooking_methods:
-                cuisine_style = 'Japanese'  # Default fallback
-            
-        except ValueError as e:
-            raise ValueError(f"Recipe generation validation error: {e}")
+        """Generate a recipe based on dish name and ingredients"""
         
         # Parse ingredients
         ingredients_list = [ing.strip() for ing in main_ingredients.split(',')]
@@ -551,56 +527,19 @@ class RecipeGenerator:
         return random.choice(wine_options)
     
     def save_recipe_to_db(self, dish_id: int, recipe: Dict):
-        """Save generated recipe to database with validation"""
-        try:
-            # Validate dish_id
-            dish_id = self.validator.validate_integer(
-                dish_id, min_val=1, field_name="dish ID"
+        """Save generated recipe to database"""
+        with IronChefDatabase() as db:
+            ingredients_json = json.dumps(recipe['ingredients'], indent=2)
+            instructions_json = json.dumps(recipe['instructions'], indent=2)
+            
+            recipe_id = db.add_recipe(
+                dish_id=dish_id,
+                recipe_title=recipe['title'],
+                ingredients=ingredients_json,
+                instructions=instructions_json,
+                prep_time=recipe['prep_time'],
+                cook_time=recipe['cook_time'],
+                servings=recipe['servings']
             )
             
-            # Validate recipe structure
-            if not isinstance(recipe, dict):
-                raise ValueError("Recipe must be a dictionary")
-            
-            required_fields = ['title', 'ingredients', 'instructions', 'prep_time', 'cook_time', 'servings']
-            for field in required_fields:
-                if field not in recipe:
-                    raise ValueError(f"Recipe missing required field: {field}")
-            
-            # Validate individual fields
-            recipe['title'] = self.validator.validate_string(
-                recipe['title'], max_length=200, field_name="recipe title"
-            )
-            
-            recipe['prep_time'] = self.validator.validate_integer(
-                recipe['prep_time'], min_val=0, max_val=480, field_name="prep time"
-            )
-            
-            recipe['cook_time'] = self.validator.validate_integer(
-                recipe['cook_time'], min_val=0, max_val=480, field_name="cook time"
-            )
-            
-            recipe['servings'] = self.validator.validate_integer(
-                recipe['servings'], min_val=1, max_val=20, field_name="servings"
-            )
-            
-            with IronChefDatabaseSecure() as db:
-                ingredients_json = json.dumps(recipe['ingredients'], indent=2)
-                instructions_json = json.dumps(recipe['instructions'], indent=2)
-                
-                recipe_id = db.add_recipe(
-                    dish_id=dish_id,
-                    recipe_title=recipe['title'],
-                    ingredients=ingredients_json,
-                    instructions=instructions_json,
-                    prep_time=recipe['prep_time'],
-                    cook_time=recipe['cook_time'],
-                    servings=recipe['servings']
-                )
-                
-                return recipe_id
-                
-        except ValueError as e:
-            raise ValueError(f"Recipe validation error: {e}")
-        except Exception as e:
-            raise Exception(f"Database error while saving recipe: {e}")
+            return recipe_id
