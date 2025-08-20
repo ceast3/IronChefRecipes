@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ recipe.recipe_title }} - Iron Chef Recipe (Print Version)</title>
+    
+    <!-- Print-optimized CSS -->
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 12pt;
+            line-height: 1.4;
+            color: #000;
+            background: #fff;
+            max-width: 8.5in;
+            margin: 0 auto;
+            padding: 0.5in;
+        }
+        
+        /* Typography */
+        h1 {
+            font-size: 20pt;
+            margin-bottom: 12pt;
+            border-bottom: 2pt solid #000;
+            padding-bottom: 6pt;
+            break-after: avoid;
+        }
+        
+        h2 {
+            font-size: 16pt;
+            margin: 18pt 0 8pt 0;
+            border-bottom: 1pt solid #333;
+            padding-bottom: 3pt;
+            break-after: avoid;
+        }
+        
+        h3 {
+            font-size: 14pt;
+            margin: 12pt 0 6pt 0;
+            break-after: avoid;
+        }
+        
+        p {
+            margin-bottom: 8pt;
+        }
+        
+        /* Recipe Header */
+        .recipe-header {
+            margin-bottom: 24pt;
+            break-inside: avoid;
+        }
+        
+        .recipe-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24pt;
+            margin: 12pt 0;
+            font-size: 11pt;
+            color: #333;
+        }
+        
+        .recipe-meta div {
+            min-width: 120pt;
+        }
+        
+        .recipe-meta strong {
+            color: #000;
+        }
+        
+        /* Ingredients Section */
+        .ingredients-section {
+            break-inside: avoid;
+            margin-bottom: 24pt;
+        }
+        
+        .ingredients-list {
+            list-style: none;
+            counter-reset: ingredient-counter;
+        }
+        
+        .ingredients-list li {
+            counter-increment: ingredient-counter;
+            margin-bottom: 6pt;
+            padding-left: 24pt;
+            position: relative;
+            break-inside: avoid;
+        }
+        
+        .ingredients-list li::before {
+            content: counter(ingredient-counter) ".";
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+        
+        .ingredient-amount {
+            font-weight: bold;
+            margin-right: 6pt;
+        }
+        
+        /* Instructions Section */
+        .instructions-section {
+            break-before: auto;
+        }
+        
+        .instructions-list {
+            list-style: none;
+            counter-reset: step-counter;
+        }
+        
+        .instructions-list li {
+            counter-increment: step-counter;
+            margin-bottom: 12pt;
+            padding-left: 24pt;
+            position: relative;
+            break-inside: avoid;
+        }
+        
+        .instructions-list li::before {
+            content: counter(step-counter) ".";
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+            font-size: 14pt;
+        }
+        
+        /* Recipe Info Boxes */
+        .recipe-info {
+            border: 1pt solid #333;
+            padding: 12pt;
+            margin: 12pt 0;
+            background-color: #f9f9f9;
+            break-inside: avoid;
+        }
+        
+        .recipe-times {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12pt;
+        }
+        
+        .time-box {
+            text-align: center;
+            min-width: 80pt;
+        }
+        
+        .time-value {
+            font-size: 16pt;
+            font-weight: bold;
+            display: block;
+        }
+        
+        .time-label {
+            font-size: 10pt;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5pt;
+        }
+        
+        /* Episode Context */
+        .episode-context {
+            border-top: 1pt solid #ccc;
+            margin-top: 24pt;
+            padding-top: 12pt;
+            font-size: 11pt;
+            color: #666;
+        }
+        
+        /* Print-specific adjustments */
+        @page {
+            margin: 0.5in;
+            size: letter;
+        }
+        
+        /* Ensure proper page breaks */
+        .ingredients-section,
+        .instructions-section {
+            page-break-inside: avoid;
+        }
+        
+        .recipe-header {
+            page-break-after: avoid;
+        }
+        
+        /* Hide elements not needed for print */
+        .no-print {
+            display: none !important;
+        }
+        
+        /* Screen view adjustments */
+        @media screen {
+            body {
+                max-width: 8.5in;
+                margin: 24pt auto;
+                padding: 24pt;
+                box-shadow: 0 0 10pt rgba(0,0,0,0.1);
+            }
+            
+            .print-button {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #007bff;
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 14px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+                z-index: 1000;
+            }
+            
+            .print-button:hover {
+                background: #0056b3;
+            }
+        }
+        
+        @media print {
+            .print-button {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Print Button (visible on screen only) -->
+    <button class="print-button no-print" onclick="window.print()">
+        🖨️ Print Recipe
+    </button>
+    
+    <!-- Recipe Header -->
+    <div class="recipe-header">
+        <h1>{{ recipe.recipe_title }}</h1>
+        
+        <div class="recipe-meta">
+            <div>
+                <strong>Dish:</strong> {{ recipe.dish_name }}
+            </div>
+            <div>
+                <strong>Episode:</strong> {{ recipe.episode_number }}
+            </div>
+            <div>
+                <strong>Theme:</strong> {{ recipe.theme }}
+            </div>
+            <div>
+                <strong>Chef Type:</strong> {{ recipe.chef_type|title }}
+            </div>
+        </div>
+        
+        {% if recipe.description %}
+        <p><em>{{ recipe.description }}</em></p>
+        {% endif %}
+    </div>
+    
+    <!-- Recipe Timing Information -->
+    {% if recipe.prep_time or recipe.cook_time or recipe.servings %}
+    <div class="recipe-info">
+        <div class="recipe-times">
+            {% if recipe.prep_time %}
+            <div class="time-box">
+                <span class="time-value">{{ recipe.prep_time }}</span>
+                <span class="time-label">Prep Time (min)</span>
+            </div>
+            {% endif %}
+            
+            {% if recipe.cook_time %}
+            <div class="time-box">
+                <span class="time-value">{{ recipe.cook_time }}</span>
+                <span class="time-label">Cook Time (min)</span>
+            </div>
+            {% endif %}
+            
+            {% if recipe.servings %}
+            <div class="time-box">
+                <span class="time-value">{{ recipe.servings }}</span>
+                <span class="time-label">Servings</span>
+            </div>
+            {% endif %}
+            
+            {% if recipe.prep_time and recipe.cook_time %}
+            <div class="time-box">
+                <span class="time-value">{{ recipe.prep_time + recipe.cook_time }}</span>
+                <span class="time-label">Total Time (min)</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Ingredients Section -->
+    <div class="ingredients-section">
+        <h2>Ingredients</h2>
+        {% if recipe.ingredients_parsed %}
+        <ol class="ingredients-list">
+            {% for ingredient in recipe.ingredients_parsed %}
+            <li>
+                {% if ingredient.amount %}
+                <span class="ingredient-amount">{{ ingredient.amount }}</span>
+                {% endif %}
+                {% if ingredient.unit %}
+                <span class="ingredient-unit">{{ ingredient.unit }}</span>
+                {% endif %}
+                <span class="ingredient-name">{{ ingredient.name or ingredient }}</span>
+                {% if ingredient.notes %}
+                <em>({{ ingredient.notes }})</em>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ol>
+        {% else %}
+        <p><em>Ingredient list not available.</em></p>
+        {% endif %}
+    </div>
+    
+    <!-- Instructions Section -->
+    <div class="instructions-section">
+        <h2>Instructions</h2>
+        {% if recipe.instructions_parsed %}
+        <ol class="instructions-list">
+            {% for instruction in recipe.instructions_parsed %}
+            <li>{{ instruction.text or instruction }}</li>
+            {% endfor %}
+        </ol>
+        {% else %}
+        <p><em>Instructions not available.</em></p>
+        {% endif %}
+    </div>
+    
+    <!-- Episode Context -->
+    <div class="episode-context">
+        <h3>Episode Information</h3>
+        <p>
+            <strong>Iron Chef Japan - Episode {{ recipe.episode_number }}</strong><br>
+            Theme: {{ recipe.theme }}<br>
+            Iron Chef: {{ recipe.iron_chef_name }}<br>
+            Competitor: {{ recipe.competitor_name }}<br>
+            {% if recipe.air_date %}Air Date: {{ recipe.air_date }}<br>{% endif %}
+            Chef Type: {{ recipe.chef_type|title }}
+        </p>
+        
+        <p style="margin-top: 12pt; font-size: 10pt; font-style: italic;">
+            Recipe generated from Iron Chef Recipe Database - 
+            a comprehensive collection of episodes, dishes, and recipes from the legendary cooking show.
+        </p>
+    </div>
+    
+    <script>
+        // Auto-focus print dialog on load (screen view only)
+        if (window.matchMedia && !window.matchMedia('print').matches) {
+            // Add print keyboard shortcut
+            document.addEventListener('keydown', function(e) {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+                    e.preventDefault();
+                    window.print();
+                }
+            });
+        }
+        
+        // Back button functionality
+        function goBack() {
+            if (document.referrer) {
+                window.history.back();
+            } else {
+                window.location.href = '/recipes';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,365 @@
+{% extends "base.html" %}
+
+{% block title %}{{ recipe.recipe_title }} - Iron Chef Recipe Database{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('recipes') }}">Recipes</a></li>
+            <li class="breadcrumb-item active">{{ recipe.recipe_title }}</li>
+        </ol>
+    </nav>
+    
+    <!-- Recipe Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card bg-success text-white border-0">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-center mb-3">
+                                <span class="badge bg-light text-dark me-3 fs-6">
+                                    Episode {{ recipe.episode_number }}
+                                </span>
+                                <span class="badge bg-{{ 'warning' if recipe.chef_type == 'competitor' else 'primary' }} fs-6">
+                                    {{ 'Iron Chef' if recipe.chef_type == 'iron_chef' else 'Competitor' }}
+                                </span>
+                            </div>
+                            <h1 class="display-6 fw-bold mb-2">{{ recipe.recipe_title }}</h1>
+                            <p class="h5 mb-2">{{ recipe.dish_name }}</p>
+                            <p class="mb-0">
+                                <i class="bi bi-tag"></i> Theme: {{ recipe.theme }}
+                            </p>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="recipe-stats text-md-end">
+                                {% if recipe.servings %}
+                                <div class="stat-item mb-2">
+                                    <i class="bi bi-people fs-4"></i>
+                                    <span class="h5 ms-2">{{ recipe.servings }} servings</span>
+                                </div>
+                                {% endif %}
+                                <div class="time-stats">
+                                    {% if recipe.prep_time %}
+                                    <div class="d-inline-block me-3">
+                                        <i class="bi bi-clock"></i> {{ recipe.prep_time }}m prep
+                                    </div>
+                                    {% endif %}
+                                    {% if recipe.cook_time %}
+                                    <div class="d-inline-block">
+                                        <i class="bi bi-fire"></i> {{ recipe.cook_time }}m cook
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recipe Content -->
+    <div class="row">
+        <!-- Ingredients -->
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm sticky-top" style="top: 100px;">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="bi bi-list-ul"></i> Ingredients
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if recipe.ingredients_parsed %}
+                        <ul class="list-unstyled mb-0">
+                            {% for ingredient in recipe.ingredients_parsed %}
+                            <li class="ingredient-item mb-2 p-2 bg-light rounded">
+                                <div class="d-flex align-items-start">
+                                    <input type="checkbox" class="form-check-input me-2 mt-1 ingredient-check">
+                                    <div class="flex-grow-1">
+                                        {% if ingredient.amount %}
+                                        <strong>{{ ingredient.amount }}</strong>
+                                        {% endif %}
+                                        <span class="ingredient-name">{{ ingredient.item if ingredient.item else ingredient }}</span>
+                                        {% if ingredient.prep %}
+                                        <small class="text-muted d-block">{{ ingredient.prep }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">No ingredients available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Instructions -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-list-ol"></i> Instructions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if recipe.instructions_parsed %}
+                        <ol class="instruction-list">
+                            {% for instruction in recipe.instructions_parsed %}
+                            <li class="instruction-item mb-3 p-3 border-start border-primary border-3">
+                                <div class="d-flex align-items-start">
+                                    <input type="checkbox" class="form-check-input me-3 mt-1 step-check">
+                                    <div class="instruction-text">{{ instruction }}</div>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ol>
+                    {% else %}
+                        <p class="text-muted">No instructions available.</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Recipe Information -->
+            {% if recipe.description %}
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-info-circle"></i> About This Dish
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">{{ recipe.description }}</p>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Episode Context -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-tv"></i> Episode Context
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Episode:</strong> {{ recipe.episode_number }}</p>
+                            <p class="mb-1"><strong>Theme:</strong> {{ recipe.theme }}</p>
+                            {% if recipe.air_date %}
+                            <p class="mb-1"><strong>Air Date:</strong> {{ recipe.air_date }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Iron Chef:</strong> {{ recipe.iron_chef_name }}</p>
+                            <p class="mb-1"><strong>Competitor:</strong> {{ recipe.competitor_name }}</p>
+                            <p class="mb-1"><strong>Created by:</strong> {{ 'Iron Chef' if recipe.chef_type == 'iron_chef' else 'Competitor' }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recipe Actions -->
+    <div class="row mt-4">
+        <div class="col">
+            <div class="card border-0 bg-light">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h6 class="mb-2">
+                                <i class="bi bi-download"></i> Export Recipe
+                            </h6>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <a href="{{ url_for('recipe_print', recipe_id=recipe.id) }}" 
+                                   class="btn btn-outline-primary btn-sm" target="_blank">
+                                    <i class="bi bi-printer"></i> Print-Friendly View
+                                </a>
+                                <button onclick="window.print()" class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi bi-printer-fill"></i> Quick Print
+                                </button>
+                                <a href="{{ url_for('export_data', export_type='recipes', format='json') }}" 
+                                   class="btn btn-outline-success btn-sm">
+                                    <i class="bi bi-filetype-json"></i> Export JSON
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <div class="d-flex gap-2 justify-content-md-end">
+                                <a href="{{ url_for('recipes') }}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-left"></i> Back to Recipes
+                                </a>
+                                <a href="{{ url_for('episode_detail', episode_id=recipe.dish_id) }}" class="btn btn-primary">
+                                    <i class="bi bi-tv"></i> View Episode
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Progress Tracker -->
+    <div class="fixed-bottom d-none d-lg-block">
+        <div class="container">
+            <div class="row justify-content-end">
+                <div class="col-auto">
+                    <div class="card border-0 shadow-lg mb-3" id="progressCard" style="display: none;">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-list-check text-success me-2"></i>
+                                <span class="small">
+                                    Progress: <span id="progressText">0/0 completed</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block head %}
+<style>
+@media print {
+    .navbar, .breadcrumb, .card-header, .fixed-bottom, .btn, .form-check-input {
+        display: none !important;
+    }
+    
+    .card {
+        border: none !important;
+        box-shadow: none !important;
+    }
+    
+    .card-body {
+        padding: 0 !important;
+    }
+    
+    .instruction-item, .ingredient-item {
+        break-inside: avoid;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+        break-after: avoid;
+    }
+}
+
+.ingredient-item.checked {
+    opacity: 0.6;
+    text-decoration: line-through;
+}
+
+.instruction-item.completed {
+    opacity: 0.7;
+}
+
+.instruction-item.completed .instruction-text {
+    text-decoration: line-through;
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ingredientChecks = document.querySelectorAll('.ingredient-check');
+    const stepChecks = document.querySelectorAll('.step-check');
+    const progressCard = document.getElementById('progressCard');
+    const progressText = document.getElementById('progressText');
+    
+    function updateProgress() {
+        const totalItems = ingredientChecks.length + stepChecks.length;
+        const checkedItems = document.querySelectorAll('.ingredient-check:checked, .step-check:checked').length;
+        
+        if (checkedItems > 0) {
+            progressCard.style.display = 'block';
+            progressText.textContent = `${checkedItems}/${totalItems} completed`;
+        } else {
+            progressCard.style.display = 'none';
+        }
+    }
+    
+    // Handle ingredient checkboxes
+    ingredientChecks.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const ingredientItem = this.closest('.ingredient-item');
+            if (this.checked) {
+                ingredientItem.classList.add('checked');
+            } else {
+                ingredientItem.classList.remove('checked');
+            }
+            updateProgress();
+        });
+    });
+    
+    // Handle step checkboxes
+    stepChecks.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const instructionItem = this.closest('.instruction-item');
+            if (this.checked) {
+                instructionItem.classList.add('completed');
+            } else {
+                instructionItem.classList.remove('completed');
+            }
+            updateProgress();
+        });
+    });
+    
+    // Save progress to localStorage
+    function saveProgress() {
+        const recipeId = {{ recipe.id }};
+        const progress = {
+            ingredients: Array.from(ingredientChecks).map(cb => cb.checked),
+            steps: Array.from(stepChecks).map(cb => cb.checked)
+        };
+        localStorage.setItem(`recipe_progress_${recipeId}`, JSON.stringify(progress));
+    }
+    
+    // Load progress from localStorage
+    function loadProgress() {
+        const recipeId = {{ recipe.id }};
+        const saved = localStorage.getItem(`recipe_progress_${recipeId}`);
+        if (saved) {
+            try {
+                const progress = JSON.parse(saved);
+                progress.ingredients.forEach((checked, index) => {
+                    if (ingredientChecks[index]) {
+                        ingredientChecks[index].checked = checked;
+                        ingredientChecks[index].dispatchEvent(new Event('change'));
+                    }
+                });
+                progress.steps.forEach((checked, index) => {
+                    if (stepChecks[index]) {
+                        stepChecks[index].checked = checked;
+                        stepChecks[index].dispatchEvent(new Event('change'));
+                    }
+                });
+            } catch (e) {
+                console.log('Could not load saved progress');
+            }
+        }
+    }
+    
+    // Save progress on change
+    [...ingredientChecks, ...stepChecks].forEach(checkbox => {
+        checkbox.addEventListener('change', saveProgress);
+    });
+    
+    // Load saved progress
+    loadProgress();
+});
+
+function printRecipe() {
+    window.print();
+}
+</script>
+{% endblock %}

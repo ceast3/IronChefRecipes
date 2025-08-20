@@ -604,3 +604,104 @@ class RecipeGenerator:
             raise ValueError(f"Recipe validation error: {e}")
         except Exception as e:
             raise Exception(f"Database error while saving recipe: {e}")
+    
+    def generate_recipe_for_dish(self, dish_data: Dict, style: str = 'traditional', 
+                                difficulty: str = 'medium', dietary_restrictions: List[str] = None) -> Dict:
+        """Generate recipe for a dish with enhanced parameters for API usage"""
+        if dietary_restrictions is None:
+            dietary_restrictions = []
+        
+        # Map style to cuisine
+        style_mapping = {
+            'traditional': 'Japanese',
+            'modern': 'French', 
+            'fusion': 'Chinese',
+            'molecular': 'French'
+        }
+        cuisine_style = style_mapping.get(style, 'Japanese')
+        
+        # Generate base recipe
+        recipe = self.generate_recipe(
+            dish_data['dish_name'],
+            dish_data['main_ingredients'],
+            cuisine_style
+        )
+        
+        # Adjust for difficulty
+        recipe = self._adjust_for_difficulty(recipe, difficulty)
+        
+        # Adjust for dietary restrictions
+        recipe = self._adjust_for_dietary_restrictions(recipe, dietary_restrictions)
+        
+        return recipe
+    
+    def _adjust_for_difficulty(self, recipe: Dict, difficulty: str) -> Dict:
+        """Adjust recipe complexity based on difficulty level"""
+        if difficulty == 'easy':
+            # Simplify instructions
+            recipe['instructions'] = recipe['instructions'][:4]  # Keep only first 4 steps
+            recipe['prep_time'] = max(10, recipe['prep_time'] - 5)
+            recipe['cook_time'] = max(5, recipe['cook_time'] - 5)
+        elif difficulty == 'hard':
+            # Add complexity
+            recipe['prep_time'] += 10
+            recipe['cook_time'] += 5
+            recipe['instructions'].append("Add an additional garnish and plate with professional precision.")
+        elif difficulty == 'expert':
+            # Maximum complexity
+            recipe['prep_time'] += 20
+            recipe['cook_time'] += 10
+            recipe['instructions'].extend([
+                "Create a complementary sauce or reduction to enhance the dish.",
+                "Add molecular gastronomy techniques for unique texture contrast.",
+                "Plate with restaurant-quality presentation and artistic flair."
+            ])
+        
+        return recipe
+    
+    def _adjust_for_dietary_restrictions(self, recipe: Dict, restrictions: List[str]) -> Dict:
+        """Adjust recipe for dietary restrictions"""
+        if not restrictions:
+            return recipe
+        
+        for restriction in restrictions:
+            restriction_lower = restriction.lower()
+            
+            if restriction_lower == 'vegetarian':
+                # Remove meat/seafood from ingredients
+                recipe['ingredients'] = [
+                    ing for ing in recipe['ingredients'] 
+                    if not any(word in ing['item'].lower() for word in 
+                              ['fish', 'meat', 'chicken', 'beef', 'pork', 'seafood', 'lobster', 'crab'])
+                ]
+                # Add vegetarian protein
+                recipe['ingredients'].append({
+                    'item': 'Firm Tofu',
+                    'amount': '8 oz',
+                    'prep': 'cubed and pressed'
+                })
+            
+            elif restriction_lower == 'vegan':
+                # Remove all animal products
+                recipe['ingredients'] = [
+                    ing for ing in recipe['ingredients'] 
+                    if not any(word in ing['item'].lower() for word in 
+                              ['fish', 'meat', 'chicken', 'beef', 'pork', 'seafood', 'lobster', 'crab',
+                               'butter', 'cream', 'cheese', 'egg', 'milk'])
+                ]
+                # Add vegan alternatives
+                recipe['ingredients'].append({
+                    'item': 'Nutritional Yeast',
+                    'amount': '2 tbsp',
+                    'prep': 'for umami flavor'
+                })
+            
+            elif restriction_lower == 'gluten-free':
+                # Replace gluten-containing ingredients
+                for ing in recipe['ingredients']:
+                    if 'flour' in ing['item'].lower():
+                        ing['item'] = 'Rice Flour'
+                    elif 'soy sauce' in ing['item'].lower():
+                        ing['item'] = 'Tamari (Gluten-Free)'
+        
+        return recipe

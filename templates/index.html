@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}Iron Chef Recipe Database - Home{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section bg-gradient text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-3">
+                    <i class="bi bi-fire text-warning"></i> Iron Chef Recipe Database
+                </h1>
+                <p class="lead mb-4">
+                    Explore the legendary culinary battles from Iron Chef Japan. Browse episodes, discover dishes, 
+                    and generate authentic recipes from the most iconic cooking show in history.
+                </p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="{{ url_for('episodes') }}" class="btn btn-warning btn-lg">
+                        <i class="bi bi-tv"></i> Browse Episodes
+                    </a>
+                    <a href="{{ url_for('recipes') }}" class="btn btn-outline-light btn-lg">
+                        <i class="bi bi-book"></i> View Recipes
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <div class="stats-grid">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="stat-card bg-white bg-opacity-10 rounded p-3">
+                                <h3 class="h2 fw-bold mb-1">{{ episode_count }}</h3>
+                                <p class="mb-0">Episodes</p>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-card bg-white bg-opacity-10 rounded p-3">
+                                <h3 class="h2 fw-bold mb-1">{{ recipe_count }}</h3>
+                                <p class="mb-0">Recipes</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Recent Episodes Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col">
+                <h2 class="h3 fw-bold mb-3">
+                    <i class="bi bi-clock-history text-primary"></i> Recent Episodes
+                </h2>
+                <p class="text-muted">Latest culinary battles from Kitchen Stadium</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            {% for episode in recent_episodes %}
+            <div class="col-lg-4 col-md-6">
+                <div class="card episode-card h-100 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="badge bg-primary">Episode {{ episode.episode_number }}</span>
+                            {% if episode.winner %}
+                                <span class="badge bg-{{ 'success' if episode.winner == 'Iron Chef' else 'warning' }}">
+                                    {{ episode.winner }}
+                                </span>
+                            {% endif %}
+                        </div>
+                        
+                        <h5 class="card-title">{{ episode.theme }}</h5>
+                        
+                        <div class="mb-3">
+                            <small class="text-muted d-block">
+                                <i class="bi bi-person-badge"></i> <strong>Iron Chef:</strong> {{ episode.iron_chef_name }}
+                            </small>
+                            <small class="text-muted d-block">
+                                <i class="bi bi-person"></i> <strong>Competitor:</strong> {{ episode.competitor_name }}
+                            </small>
+                            {% if episode.air_date %}
+                            <small class="text-muted d-block">
+                                <i class="bi bi-calendar"></i> {{ episode.air_date }}
+                            </small>
+                            {% endif %}
+                        </div>
+                        
+                        <a href="{{ url_for('episode_detail', episode_id=episode.id) }}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-eye"></i> View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="{{ url_for('episodes') }}" class="btn btn-primary">
+                <i class="bi bi-tv"></i> View All Episodes
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Themes Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col">
+                <h2 class="h3 fw-bold mb-3">
+                    <i class="bi bi-tags text-warning"></i> Popular Themes
+                </h2>
+                <p class="text-muted">Explore episodes by theme ingredients</p>
+            </div>
+        </div>
+        
+        <div class="row g-3">
+            {% for theme in themes %}
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <a href="{{ url_for('episodes', theme=theme) }}" class="theme-tag text-decoration-none">
+                    <div class="card theme-card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <h6 class="card-title mb-0">{{ theme }}</h6>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="{{ url_for('episodes') }}" class="btn btn-warning">
+                <i class="bi bi-search"></i> Browse All Themes
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col text-center">
+                <h2 class="h3 fw-bold mb-3">Features</h2>
+                <p class="text-muted">Everything you need to explore Iron Chef Japan</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card text-center">
+                    <div class="feature-icon bg-primary text-white rounded-circle mb-3 mx-auto">
+                        <i class="bi bi-tv"></i>
+                    </div>
+                    <h5>Episode Browser</h5>
+                    <p class="text-muted">Search and filter through all Iron Chef episodes with detailed information.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card text-center">
+                    <div class="feature-icon bg-success text-white rounded-circle mb-3 mx-auto">
+                        <i class="bi bi-book"></i>
+                    </div>
+                    <h5>Recipe Collection</h5>
+                    <p class="text-muted">Browse and generate authentic recipes based on the dishes from the show.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card text-center">
+                    <div class="feature-icon bg-warning text-white rounded-circle mb-3 mx-auto">
+                        <i class="bi bi-search"></i>
+                    </div>
+                    <h5>Smart Search</h5>
+                    <p class="text-muted">Find episodes, dishes, and recipes by theme, chef, or ingredient.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card text-center">
+                    <div class="feature-icon bg-info text-white rounded-circle mb-3 mx-auto">
+                        <i class="bi bi-download"></i>
+                    </div>
+                    <h5>Export Data</h5>
+                    <p class="text-muted">Export episodes and recipes in JSON, CSV, and text formats.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Add some interactive hover effects
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate episode cards on hover
+    const episodeCards = document.querySelectorAll('.episode-card');
+    episodeCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+            this.style.transition = 'transform 0.3s ease';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+    
+    // Animate theme cards on hover
+    const themeCards = document.querySelectorAll('.theme-card');
+    themeCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.05)';
+            this.style.transition = 'transform 0.2s ease';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+});
+</script>
+{% endblock %}

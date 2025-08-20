@@ -77,8 +77,30 @@ CREATE TABLE dish_ingredients (
 );
 
 -- Create indexes for better query performance
+
+-- Episode-related indices
 CREATE INDEX idx_episodes_theme ON episodes(theme);
 CREATE INDEX idx_episodes_iron_chef ON episodes(iron_chef_id);
 CREATE INDEX idx_episodes_competitor ON episodes(competitor_id);
+CREATE INDEX idx_episodes_air_date ON episodes(air_date);
+CREATE INDEX idx_episodes_episode_number ON episodes(episode_number);
+
+-- Dish-related indices
 CREATE INDEX idx_dishes_episode ON dishes(episode_id);
 CREATE INDEX idx_dishes_chef_type ON dishes(chef_type);
+
+-- Recipe-related indices (foreign key and temporal queries)
+CREATE INDEX idx_recipes_dish_id ON recipes(dish_id);
+CREATE INDEX idx_recipes_generated_date ON recipes(generated_date);
+
+-- Dish ingredients junction table indices (critical for join performance)
+CREATE INDEX idx_dish_ingredients_dish_id ON dish_ingredients(dish_id);
+CREATE INDEX idx_dish_ingredients_ingredient_id ON dish_ingredients(ingredient_id);
+
+-- Ingredient search optimization
+CREATE INDEX idx_ingredients_name ON ingredients(name);
+
+-- Composite indices for common query patterns
+CREATE INDEX idx_episodes_theme_date ON episodes(theme, air_date);
+CREATE INDEX idx_dishes_episode_chef ON dishes(episode_id, chef_type);
+CREATE INDEX idx_recipes_dish_date ON recipes(dish_id, generated_date);

@@ -10,8 +10,31 @@
 # - random (recipe generation)
 # - argparse (CLI)
 
+# Testing dependencies:
+pytest>=7.0.0  # Testing framework
+pytest-cov>=4.0.0  # Coverage reporting
+pytest-mock>=3.10.0  # Mocking utilities
+pytest-xdist>=3.0.0  # Parallel test execution
+
+# Performance monitoring dependencies:
+psutil>=5.9.0  # System and process monitoring for benchmarks
+
+# Web application dependencies:
+flask>=2.0.0  # Web framework
+flask-wtf>=1.0.0  # CSRF protection and form handling
+jinja2>=3.0.0  # Template engine
+werkzeug>=2.0.0  # WSGI utilities
+markupsafe>=2.0.0  # Safe string handling
+
+# RESTful API dependencies:
+flask-restful>=0.3.9  # RESTful API framework
+marshmallow>=3.19.0  # Data serialization and validation
+apispec>=6.3.0  # OpenAPI specification generation
+apispec[validation]>=6.3.0  # Request/response validation
+flask-limiter>=3.3.1  # Rate limiting
+flask-cors>=4.0.0  # CORS support
+pydantic>=1.10.0  # Data validation
+
 # Optional future dependencies for enhancements:
-# flask>=2.0.0  # For web interface
 # requests>=2.28.0  # For API integrations
 # plotly>=5.0.0  # For analytics dashboard
-# pytest>=7.0.0  # For testing

@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}Error {{ error_code }} - Iron Chef Recipe Database{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="text-center">
+                <!-- Error Icon -->
+                <div class="error-icon mb-4">
+                    {% if error_code == 404 %}
+                        <i class="bi bi-search display-1 text-muted"></i>
+                    {% elif error_code == 500 %}
+                        <i class="bi bi-exclamation-triangle display-1 text-danger"></i>
+                    {% else %}
+                        <i class="bi bi-x-circle display-1 text-warning"></i>
+                    {% endif %}
+                </div>
+                
+                <!-- Error Code -->
+                <h1 class="display-4 fw-bold text-primary mb-3">{{ error_code }}</h1>
+                
+                <!-- Error Message -->
+                <h2 class="h4 mb-3">
+                    {% if error_code == 404 %}
+                        Page Not Found
+                    {% elif error_code == 500 %}
+                        Internal Server Error
+                    {% elif error_code == 400 %}
+                        Bad Request
+                    {% else %}
+                        Error
+                    {% endif %}
+                </h2>
+                
+                <p class="text-muted mb-4">
+                    {% if error_message %}
+                        {{ error_message }}
+                    {% else %}
+                        {% if error_code == 404 %}
+                            The page you're looking for doesn't exist or has been moved.
+                        {% elif error_code == 500 %}
+                            Something went wrong on our end. Please try again later.
+                        {% elif error_code == 400 %}
+                            There was a problem with your request. Please check your input and try again.
+                        {% else %}
+                            An unexpected error occurred.
+                        {% endif %}
+                    {% endif %}
+                </p>
+                
+                <!-- Suggestions -->
+                <div class="card border-0 bg-light">
+                    <div class="card-body">
+                        <h5 class="card-title">What can you do?</h5>
+                        <ul class="list-unstyled mb-0">
+                            {% if error_code == 404 %}
+                            <li class="mb-2">
+                                <i class="bi bi-check text-success"></i> 
+                                Check the URL for typos
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check text-success"></i> 
+                                Use the search function to find what you're looking for
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check text-success"></i> 
+                                Browse episodes or recipes from the navigation
+                            </li>
+                            {% elif error_code == 500 %}
+                            <li class="mb-2">
+                                <i class="bi bi-check text-success"></i> 
+                                Refresh the page and try again
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check text-success"></i> 
+                                Wait a few minutes and try again
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check text-success"></i> 
+                                Return to the homepage and navigate from there
+                            </li>
+                            {% else %}
+                            <li class="mb-2">
+                                <i class="bi bi-check text-success"></i> 
+                                Go back and try again
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check text-success"></i> 
+                                Return to the homepage
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check text-success"></i> 
+                                Use the search function
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="mt-4">
+                    <div class="d-flex gap-2 justify-content-center flex-wrap">
+                        <a href="{{ url_for('index') }}" class="btn btn-primary">
+                            <i class="bi bi-house"></i> Go Home
+                        </a>
+                        <button onclick="history.back()" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Go Back
+                        </button>
+                        <a href="{{ url_for('search') }}" class="btn btn-outline-primary">
+                            <i class="bi bi-search"></i> Search
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Quick Links -->
+                <div class="mt-4">
+                    <h6 class="text-muted mb-3">Quick Links</h6>
+                    <div class="d-flex gap-3 justify-content-center flex-wrap">
+                        <a href="{{ url_for('episodes') }}" class="text-decoration-none">
+                            <i class="bi bi-tv"></i> Episodes
+                        </a>
+                        <a href="{{ url_for('recipes') }}" class="text-decoration-none">
+                            <i class="bi bi-book"></i> Recipes
+                        </a>
+                        <a href="{{ url_for('search') }}" class="text-decoration-none">
+                            <i class="bi bi-search"></i> Search
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add some interactive feedback
+    const actionButtons = document.querySelectorAll('.btn');
+    actionButtons.forEach(button => {
+        button.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+            this.style.transition = 'transform 0.2s ease';
+        });
+        
+        button.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+    
+    // Auto-focus on the search page if it's a 404 error
+    if ({{ error_code }} === 404) {
+        // Small delay to allow page to load
+        setTimeout(() => {
+            const searchLink = document.querySelector('a[href*="search"]');
+            if (searchLink) {
+                searchLink.focus();
+            }
+        }, 1000);
+    }
+});
+</script>
+{% endblock %}

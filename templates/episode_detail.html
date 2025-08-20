@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block title %}Episode {{ episode.episode_number }}: {{ episode.theme }} - Iron Chef Recipe Database{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('episodes') }}">Episodes</a></li>
+            <li class="breadcrumb-item active">Episode {{ episode.episode_number }}</li>
+        </ol>
+    </nav>
+    
+    <!-- Episode Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card bg-primary text-white border-0">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="badge bg-light text-dark me-3 fs-6">Episode {{ episode.episode_number }}</span>
+                                {% if episode.winner %}
+                                <span class="badge bg-{{ 'success' if episode.winner == 'Iron Chef' else 'warning' if episode.winner == 'Competitor' else 'secondary' }} fs-6">
+                                    <i class="bi bi-trophy"></i> Winner: {{ episode.winner }}
+                                </span>
+                                {% endif %}
+                            </div>
+                            <h1 class="display-6 fw-bold mb-3">{{ episode.theme }}</h1>
+                            {% if episode.air_date %}
+                            <p class="mb-0">
+                                <i class="bi bi-calendar"></i> Aired: {{ episode.air_date }}
+                            </p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            {% if episode.judges_scores %}
+                            <div class="judges-scores">
+                                <h6 class="mb-1">Judges' Scores</h6>
+                                <p class="h5 mb-0">{{ episode.judges_scores }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Chefs Information -->
+    <div class="row mb-5">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-person-badge"></i> Iron Chef
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title">{{ episode.iron_chef_name }}</h4>
+                    <div class="chef-dishes">
+                        <h6 class="text-muted mb-3">Dishes Presented:</h6>
+                        {% if episode.dishes.iron_chef %}
+                            <div class="list-group list-group-flush">
+                                {% for dish in episode.dishes.iron_chef %}
+                                <div class="list-group-item border-0 px-0">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1">{{ dish.dish_number }}. {{ dish.dish_name }}</h6>
+                                            {% if dish.description %}
+                                            <p class="mb-2 text-muted small">{{ dish.description }}</p>
+                                            {% endif %}
+                                            {% if dish.main_ingredients %}
+                                            <small class="text-success">
+                                                <i class="bi bi-tags"></i> {{ dish.main_ingredients }}
+                                            </small>
+                                            {% endif %}
+                                        </div>
+                                        <div class="ms-3">
+                                            <form method="post" action="{{ url_for('generate_recipe', dish_id=dish.id) }}" class="d-inline">
+                                                {% if csrf_token %}
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                {% endif %}
+                                                <input type="hidden" name="episode_id" value="{{ episode.id }}">
+                                                <button type="submit" class="btn btn-outline-success btn-sm" 
+                                                        title="Generate Recipe">
+                                                    <i class="bi bi-magic"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-muted">No dishes recorded for this chef.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-person"></i> Competitor
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title">{{ episode.competitor_name }}</h4>
+                    <div class="chef-dishes">
+                        <h6 class="text-muted mb-3">Dishes Presented:</h6>
+                        {% if episode.dishes.competitor %}
+                            <div class="list-group list-group-flush">
+                                {% for dish in episode.dishes.competitor %}
+                                <div class="list-group-item border-0 px-0">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1">{{ dish.dish_number }}. {{ dish.dish_name }}</h6>
+                                            {% if dish.description %}
+                                            <p class="mb-2 text-muted small">{{ dish.description }}</p>
+                                            {% endif %}
+                                            {% if dish.main_ingredients %}
+                                            <small class="text-success">
+                                                <i class="bi bi-tags"></i> {{ dish.main_ingredients }}
+                                            </small>
+                                            {% endif %}
+                                        </div>
+                                        <div class="ms-3">
+                                            <form method="post" action="{{ url_for('generate_recipe', dish_id=dish.id) }}" class="d-inline">
+                                                {% if csrf_token %}
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                {% endif %}
+                                                <input type="hidden" name="episode_id" value="{{ episode.id }}">
+                                                <button type="submit" class="btn btn-outline-success btn-sm" 
+                                                        title="Generate Recipe">
+                                                    <i class="bi bi-magic"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-muted">No dishes recorded for this competitor.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Episode Actions -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card border-0 bg-light">
+                <div class="card-body">
+                    <h6 class="card-title">
+                        <i class="bi bi-download"></i> Export Episode Data
+                    </h6>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="{{ url_for('export_data', export_type='theme', theme=episode.theme, format='json') }}" 
+                           class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-filetype-json"></i> Export Theme Episodes (JSON)
+                        </a>
+                        <a href="{{ url_for('episodes', theme=episode.theme) }}" 
+                           class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-search"></i> View All "{{ episode.theme }}" Episodes
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Navigation -->
+    <div class="row">
+        <div class="col">
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('episodes') }}" class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-left"></i> Back to Episodes
+                </a>
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('recipes') }}" class="btn btn-success">
+                        <i class="bi bi-book"></i> Browse All Recipes
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle recipe generation forms
+    const recipeButtons = document.querySelectorAll('form[action*="generate-recipe"] button');
+    recipeButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            const form = this.closest('form');
+            const dishName = this.closest('.list-group-item').querySelector('h6').textContent;
+            
+            if (!confirm(`Generate a recipe for "${dishName.replace(/^\d+\.\s/, '')}"?`)) {
+                e.preventDefault();
+                return;
+            }
+            
+            // Show loading state
+            this.innerHTML = '<i class="bi bi-hourglass-split"></i>';
+            this.disabled = true;
+            
+            // Add a timeout to prevent infinite loading states
+            setTimeout(() => {
+                this.innerHTML = '<i class="bi bi-magic"></i>';
+                this.disabled = false;
+            }, 10000);
+        });
+    });
+    
+    // Add hover effects to dish cards
+    const dishItems = document.querySelectorAll('.list-group-item');
+    dishItems.forEach(item => {
+        item.addEventListener('mouseenter', function() {
+            this.style.backgroundColor = '#f8f9fa';
+            this.style.transition = 'background-color 0.2s ease';
+        });
+        
+        item.addEventListener('mouseleave', function() {
+            this.style.backgroundColor = 'transparent';
+        });
+    });
+});
+</script>
+{% endblock %}

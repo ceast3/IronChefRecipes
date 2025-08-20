@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}Episodes - Iron Chef Recipe Database{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h2 fw-bold mb-3">
+                <i class="bi bi-tv text-primary"></i> Episodes
+            </h1>
+            <p class="text-muted">Browse all Iron Chef Japan episodes with search and filter options</p>
+        </div>
+    </div>
+    
+    <!-- Search and Filter Section -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <form method="get" action="{{ url_for('episodes') }}">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-4">
+                                <label for="theme" class="form-label">
+                                    <i class="bi bi-tag"></i> Filter by Theme
+                                </label>
+                                <select class="form-select" id="theme" name="theme">
+                                    <option value="">All Themes</option>
+                                    {% for theme in all_themes %}
+                                    <option value="{{ theme }}" {% if search_theme == theme %}selected{% endif %}>
+                                        {{ theme }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="chef" class="form-label">
+                                    <i class="bi bi-person"></i> Search by Chef Name
+                                </label>
+                                <input type="text" class="form-control" id="chef" name="chef" 
+                                       placeholder="Iron Chef or Competitor name..." 
+                                       value="{{ search_chef }}" maxlength="100">
+                            </div>
+                            <div class="col-md-4">
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-search"></i> Search
+                                    </button>
+                                    <a href="{{ url_for('episodes') }}" class="btn btn-outline-secondary">
+                                        <i class="bi bi-arrow-clockwise"></i> Clear
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Results Info -->
+    {% if search_theme or search_chef %}
+    <div class="row mb-3">
+        <div class="col">
+            <div class="alert alert-info border-0">
+                <i class="bi bi-info-circle"></i>
+                Showing {{ pagination.total }} episodes
+                {% if search_theme %}for theme "<strong>{{ search_theme }}</strong>"{% endif %}
+                {% if search_chef %}{% if search_theme %}and {% endif %}with chef "<strong>{{ search_chef }}</strong>"{% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Episodes Grid -->
+    <div class="row g-4 mb-4">
+        {% for episode in episodes %}
+        <div class="col-lg-4 col-md-6">
+            <div class="card episode-card h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="badge bg-primary fs-6">Episode {{ episode.episode_number }}</span>
+                        {% if episode.winner %}
+                            <span class="badge bg-{{ 'success' if episode.winner == 'Iron Chef' else 'warning' if episode.winner == 'Competitor' else 'secondary' }}">
+                                <i class="bi bi-trophy"></i> {{ episode.winner }}
+                            </span>
+                        {% endif %}
+                    </div>
+                    
+                    <h5 class="card-title mb-3">{{ episode.theme }}</h5>
+                    
+                    <div class="episode-details mb-3">
+                        <div class="row g-2">
+                            <div class="col-12">
+                                <small class="text-muted d-block">
+                                    <i class="bi bi-person-badge text-primary"></i> 
+                                    <strong>Iron Chef:</strong> {{ episode.iron_chef_name }}
+                                </small>
+                            </div>
+                            <div class="col-12">
+                                <small class="text-muted d-block">
+                                    <i class="bi bi-person text-success"></i> 
+                                    <strong>Competitor:</strong> {{ episode.competitor_name }}
+                                </small>
+                            </div>
+                            {% if episode.air_date %}
+                            <div class="col-12">
+                                <small class="text-muted d-block">
+                                    <i class="bi bi-calendar text-info"></i> 
+                                    {{ episode.air_date }}
+                                </small>
+                            </div>
+                            {% endif %}
+                            {% if episode.judges_scores %}
+                            <div class="col-12">
+                                <small class="text-muted d-block">
+                                    <i class="bi bi-star text-warning"></i> 
+                                    {{ episode.judges_scores }}
+                                </small>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-footer bg-transparent border-0 pt-0">
+                    <a href="{{ url_for('episode_detail', episode_id=episode.id) }}" 
+                       class="btn btn-outline-primary btn-sm w-100">
+                        <i class="bi bi-eye"></i> View Episode Details
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="bi bi-search display-1 text-muted"></i>
+                <h3 class="mt-3">No episodes found</h3>
+                <p class="text-muted">Try adjusting your search criteria or browse all episodes.</p>
+                <a href="{{ url_for('episodes') }}" class="btn btn-primary">
+                    <i class="bi bi-tv"></i> Show All Episodes
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if pagination.pages > 1 %}
+    <nav aria-label="Episodes pagination">
+        <ul class="pagination justify-content-center">
+            <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+                <a class="page-link" href="{% if pagination.has_prev %}{{ url_for('episodes', page=pagination.prev_num, theme=search_theme, chef=search_chef) }}{% else %}#{% endif %}">
+                    <i class="bi bi-chevron-left"></i> Previous
+                </a>
+            </li>
+            
+            {% for page_num in range(1, pagination.pages + 1) %}
+                {% if page_num == pagination.page %}
+                <li class="page-item active">
+                    <span class="page-link">{{ page_num }}</span>
+                </li>
+                {% elif page_num <= 3 or page_num > pagination.pages - 3 or (page_num >= pagination.page - 1 and page_num <= pagination.page + 1) %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('episodes', page=page_num, theme=search_theme, chef=search_chef) }}">{{ page_num }}</a>
+                </li>
+                {% elif page_num == 4 or page_num == pagination.pages - 3 %}
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+                {% endif %}
+            {% endfor %}
+            
+            <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+                <a class="page-link" href="{% if pagination.has_next %}{{ url_for('episodes', page=pagination.next_num, theme=search_theme, chef=search_chef) }}{% else %}#{% endif %}">
+                    Next <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    
+    <div class="text-center text-muted">
+        <small>
+            Showing {{ ((pagination.page - 1) * pagination.per_page + 1) }} to 
+            {{ pagination.page * pagination.per_page if pagination.page * pagination.per_page <= pagination.total else pagination.total }} 
+            of {{ pagination.total }} episodes
+        </small>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add hover effects to episode cards
+    const episodeCards = document.querySelectorAll('.episode-card');
+    episodeCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-3px)';
+            this.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease';
+            this.style.boxShadow = '0 0.5rem 1rem rgba(0,0,0,0.15)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+            this.style.boxShadow = '';
+        });
+    });
+    
+    // Auto-submit form when theme is changed
+    const themeSelect = document.getElementById('theme');
+    if (themeSelect) {
+        themeSelect.addEventListener('change', function() {
+            // Only auto-submit if there's no chef search term
+            const chefInput = document.getElementById('chef');
+            if (!chefInput.value.trim()) {
+                this.form.submit();
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

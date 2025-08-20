@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Iron Chef Japan Recipe Database - Browse episodes, dishes, and recipes from the legendary cooking show">
+    <meta name="keywords" content="Iron Chef, recipes, cooking, Japanese cuisine, episodes, dishes">
+    <title>{% block title %}Iron Chef Recipe Database{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">
+                <i class="bi bi-fire"></i> Iron Chef DB
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}" href="{{ url_for('index') }}">
+                            <i class="bi bi-house"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'episodes' %}active{% endif %}" href="{{ url_for('episodes') }}">
+                            <i class="bi bi-tv"></i> Episodes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'recipes' %}active{% endif %}" href="{{ url_for('recipes') }}">
+                            <i class="bi bi-book"></i> Recipes
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-download"></i> Export
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('export_data', export_type='episodes', format='json') }}">
+                                <i class="bi bi-filetype-json"></i> Episodes (JSON)
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('export_data', export_type='episodes', format='csv') }}">
+                                <i class="bi bi-filetype-csv"></i> Episodes (CSV)
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('export_data', export_type='recipes', format='json') }}">
+                                <i class="bi bi-filetype-json"></i> All Recipes
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+                
+                <!-- Search Form -->
+                <form class="d-flex" action="{{ url_for('search') }}" method="get">
+                    <div class="input-group">
+                        <input class="form-control" type="search" name="q" placeholder="Search episodes, dishes, recipes..." 
+                               value="{{ request.args.get('q', '') }}" maxlength="100">
+                        <button class="btn btn-outline-light" type="submit">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container mt-3">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="bi bi-fire"></i> Iron Chef Recipe Database</h5>
+                    <p class="text-muted">Explore the culinary battles and recipes from the legendary Iron Chef Japan series.</p>
+                </div>
+                <div class="col-md-3">
+                    <h6>Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="{{ url_for('episodes') }}" class="text-light text-decoration-none">Browse Episodes</a></li>
+                        <li><a href="{{ url_for('recipes') }}" class="text-light text-decoration-none">View Recipes</a></li>
+                        <li><a href="{{ url_for('search') }}" class="text-light text-decoration-none">Search</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h6>Export Data</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="{{ url_for('export_data', export_type='episodes', format='json') }}" class="text-light text-decoration-none">Episodes JSON</a></li>
+                        <li><a href="{{ url_for('export_data', export_type='recipes', format='json') }}" class="text-light text-decoration-none">All Recipes</a></li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-3">
+            <div class="row">
+                <div class="col text-center text-muted">
+                    <small>&copy; 2024 Iron Chef Recipe Database. Secure web application with responsive design.</small>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    <!-- CSRF Token for JavaScript -->
+    {% if csrf_token %}
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    {% endif %}
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>
